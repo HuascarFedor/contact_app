@@ -1,4 +1,6 @@
+import 'package:contacto_app/data.dart';
 import 'package:contacto_app/data_provider.dart';
+import 'package:contacto_app/item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,17 +14,38 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Agenda'),
       ),
-      //body: ,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: dataProvider.dataList.length,
+                  itemBuilder: (context, index) {
+                    final Data data = dataProvider.dataList[index];
+                    return Item(
+                      data: data,
+                      onEditPressed: () => _editContact(data, context, dataProvider),
+                      onDeletePressed: () => dataProvider.delete(data.id!),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _addTask(context, dataProvider);
+          _addContact(context, dataProvider);
         },
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _addTask(BuildContext context, DataProvider dataProvider) {
+  void _addContact(BuildContext context, DataProvider dataProvider) {
     showDialog(
         context: context,
         builder: (context) {
@@ -30,16 +53,20 @@ class HomePage extends StatelessWidget {
           String email = "";
           return AlertDialog(
             title: const Text('Nuevo Contacto'),
-            content: const Column(
+            content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  onChanged: null,
-                  decoration: InputDecoration(labelText: "Nombre"),
+                  onChanged: (value) {
+                    name = value;
+                  },
+                  decoration: const InputDecoration(labelText: "Nombre"),
                 ),
                 TextField(
-                  onChanged: null,
-                  decoration: InputDecoration(labelText: "E-Mail"),
+                  onChanged: (value) {
+                    email = value;
+                  },
+                  decoration: const InputDecoration(labelText: "E-Mail"),
                 ),
               ],
             ),
@@ -49,7 +76,58 @@ class HomePage extends StatelessWidget {
                     Navigator.of(context).pop();
                   },
                   child: const Text('Cancelar')),
-              const TextButton(onPressed: null, child: Text('Agregar')),
+              TextButton(
+                  onPressed: () {
+                    dataProvider.add(Data(name: name, email: email));
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Agregar')),
+            ],
+          );
+        });
+  }
+
+  void _editContact(Data data, BuildContext context, DataProvider dataProvider) {
+    final TextEditingController nameController = TextEditingController(text: data.name);
+    final TextEditingController emailController = TextEditingController(text: data.email);
+    showDialog(
+        context: context,
+        builder: (context) {
+          String name = data.name;
+          String email = data.email;
+          return AlertDialog(
+            title: const Text('Actualizar Contacto'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  onChanged: (value) {
+                    name = value;
+                  },
+                  decoration: const InputDecoration(labelText: "Nombre"),
+                ),
+                TextField(
+                  controller: emailController,
+                  onChanged: (value) {
+                    email = value;
+                  },
+                  decoration: const InputDecoration(labelText: "E-Mail"),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancelar')),
+              TextButton(
+                  onPressed: () {
+                    dataProvider.edit(Data(id: data.id, name: name, email: email));
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Guardar')),
             ],
           );
         });

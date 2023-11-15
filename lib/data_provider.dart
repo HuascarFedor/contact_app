@@ -17,4 +17,14 @@ class DataProvider with ChangeNotifier {
     await dbHelper.insertData(data);
     _loadDataFromDatabase();
   }
+
+  Future<void> delete(int id) async {
+    await dbHelper.deleteData(id);
+    _loadDataFromDatabase();
+  }
+
+  Future<void> edit(Data data) async {
+    await dbHelper.updateData(data);
+    _loadDataFromDatabase();
+  }
 }

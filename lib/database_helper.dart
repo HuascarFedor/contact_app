@@ -43,4 +43,14 @@ class DatabaseHelper {
       return Data.fromMap(maps[i]);
     });
   }
+
+  Future<void> deleteData(int id) async {
+    final db = await database;
+    await db.delete('my_table', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> updateData(Data data) async {
+    final db = await database;
+    await db.update('my_table', data.toMap(), where: 'id = ?', whereArgs: [data.id]);
+  }
 }
